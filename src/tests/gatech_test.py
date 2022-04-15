@@ -11,17 +11,17 @@ with open("gt-model.txt", 'r') as file:
     file.readline()
     mode = 0
     for line in file.readlines():
-        if line == '\n':
+        if line[0] == '#':
+            print(line)
             mode += 1
             continue
         a, b = line.split(':')
         points = a.split(',') + b.split(',')
-        a1, a2, b1, b2 = [int(x)*scale_factor+offset for x in points]
-        roads.append(((a1, a2), (b1, b2)))
-        if mode == 1:
-            roads.append(((a1, a2), (b1, b2)))
-        if mode == 2:
-            break
+        a1, a2, b1, b2 = [int(x) * scale_factor + offset for x in points]
+        a, b = (a1, a2), (b1, b2)
+        roads.append((a, b, mode, mode == 2))
+        if mode != 0:
+            roads.append((b, a, mode, mode == 2))
 
 sim.create_roads(roads)
 

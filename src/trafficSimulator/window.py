@@ -233,6 +233,11 @@ class Window:
             )
 
     def draw_roads(self):
+        color_dict = {
+            0: (255, 180, 180),
+            1: (180, 180, 255),
+            2: (180, 255, 180)
+        }
         for road in self.sim.roads:
             # Draw road background
             self.rotated_box(
@@ -240,7 +245,7 @@ class Window:
                 (road.length, 3.7),
                 cos=road.angle_cos,
                 sin=road.angle_sin,
-                color=(180, 180, 220),
+                color=color_dict[road.color],
                 centered=False
             )
             # Draw road lines
@@ -254,7 +259,7 @@ class Window:
             # )
 
             # Draw road arrow
-            if road.length > 5: 
+            if road.length > 5 and road.color == 0:
                 for i in np.arange(-0.5*road.length, 0.5*road.length, 10):
                     pos = (
                         road.start[0] + (road.length/2 + i + 3) * road.angle_cos,
@@ -266,11 +271,7 @@ class Window:
                         (-1.25, 0.2),
                         cos=road.angle_cos,
                         sin=road.angle_sin
-                    )   
-            
-
-
-            # TODO: Draw road arrow
+                    )
 
     def draw_vehicle(self, vehicle, road):
         l, h = vehicle.l,  2

@@ -2,11 +2,14 @@ from scipy.spatial import distance
 from collections import deque
 
 class Road:
-    def __init__(self, start, end):
+    def __init__(self, start, end, color, car_friendly=False):
         self.start = start
         self.end = end
 
         self.vehicles = deque()
+
+        self.car_friendly = car_friendly
+        self.color = color
 
         self.init_properties()
 

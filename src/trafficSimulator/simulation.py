@@ -20,8 +20,8 @@ class Simulation:
         self.generators = []
         self.traffic_signals = []
 
-    def create_road(self, start, end):
-        road = Road(start, end)
+    def create_road(self, start, end, color, car_friendly=False):
+        road = Road(start, end, color, car_friendly)
         self.roads.append(road)
         return road
 
