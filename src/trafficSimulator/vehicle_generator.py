@@ -1,6 +1,7 @@
 from .vehicle import Vehicle
 from numpy.random import randint
 from collections import deque
+from random import choices
 
 class VehicleGenerator:
     def __init__(self, sim, config={}):
@@ -16,7 +17,7 @@ class VehicleGenerator:
 
     def set_default_config(self):
         """Set default configuration"""
-        self.poisson = False
+        self.poisson = True
         self.vehicle_rate = 20 # rate for poisson dist
         self.vehicles = [
             (1, {})  # (weight for generation, vehicle config)
@@ -24,10 +25,10 @@ class VehicleGenerator:
         self.last_added_time = 0
 
         self.burst_queue = deque()  # queue of generated vehicles
-        self.burst_freq = 50  # time between bursts
+        self.burst_freq = 15  # time between bursts
         self.last_burst = 0  # time last burst was completed
-        self.min_burst = 5  # min number of vehicles in burst
-        self.max_burst = 5  # max number of vehicles in burst
+        self.min_burst = 10  # min number of vehicles in burst
+        self.max_burst = 30  # max number of vehicles in burst
 
 
     def init_properties(self):
@@ -35,12 +36,9 @@ class VehicleGenerator:
 
     def generate_vehicle(self):
         """Returns a random vehicle from self.vehicles with random proportions"""
-        total = sum(pair[0] for pair in self.vehicles)
-        r = randint(1, total+1)
-        for (weight, config) in self.vehicles:
-            r -= weight
-            if r <= 0:
-                return Vehicle(config)
+        [config] = choices(self.vehicles, weights=self.weights)
+        return Vehicle(config)
+
 
     def update(self):
         """Add vehicles"""

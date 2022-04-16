@@ -3,6 +3,36 @@ import numpy as np
 
 class Vehicle:
     def __init__(self, config={}):
+        self.car_attributes = {
+            'l': 4,         # length of the car
+            's0': 4,
+            'T': 1,
+            'v_max': 16.6,  # max velocity of the car
+            'a_max': 1.44,  # max acceleration of the car
+            'b_max': 4.61,
+            'color': (0, 0, 255)
+        }
+
+        self.bike_attributes = {
+            'l': 2,         # length of the car
+            's0': 2,
+            'T': 1,
+            'v_max': 8,     # max velocity of the car
+            'a_max': 0.85,  # max acceleration of the car
+            'b_max': 4.61,  # max break speed
+            'color': (255, 255, 0)
+        }
+
+        self.walk_attributes = {
+            'l': 1,         # length of the car
+            's0': 1,
+            'T': 1,
+            'v_max': 4,     # max velocity of the Person
+            'a_max': 0.32,  # max acceleration of the Person
+            'b_max': 4.61,
+            'color': (255, 0, 0)
+        }
+
         # Set default configuration
         self.set_default_config()
 
@@ -10,22 +40,24 @@ class Vehicle:
         for attr, val in config.items():
             setattr(self, attr, val)
 
+        if self.vehicle_type == 'car':
+            for attr, val in self.car_attributes.items():
+                setattr(self, attr, val)
+        elif self.vehicle_type == 'bike':
+            for attr, val in self.bike_attributes.items():
+                setattr(self, attr, val)
+        elif self.vehicle_type == 'walk':
+            for attr, val in self.walk_attributes.items():
+                setattr(self, attr, val)
+        self.v = self.v_max
         # Calculate properties
         self.init_properties()
 
     def set_default_config(self):
-        self.l = 4  # length of the car
-        self.s0 = 4
-        self.T = 1
-        self.v_max = 16.6  # max velocity of the car
-        self.a_max = 1.44  # max acceleration of the car
-        self.b_max = 4.61  # max break speed of the car
-
         self.path = []
         self.current_road_index = 0
 
         self.x = 0
-        self.v = self.v_max
         self.a = 0
         self.stopped = False
 

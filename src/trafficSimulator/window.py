@@ -139,8 +139,6 @@ class Window:
         if filled:
             gfxdraw.filled_circle(self.screen, *pos, radius, color)
 
-
-
     def polygon(self, vertices, color, filled=True):
         gfxdraw.aapolygon(self.screen, vertices, color)
         if filled:
@@ -238,6 +236,7 @@ class Window:
             1: (180, 180, 255),
             2: (180, 255, 180)
         }
+        label_font = pygame.font.SysFont("monospace", 12)
         for road in self.sim.roads:
             # Draw road background
             self.rotated_box(
@@ -258,6 +257,8 @@ class Window:
             #     centered=False
             # )
 
+            label = label_font.render(f'{road.index}', True, (0, 0, 0))
+            # self.screen.blit(label, road.start)
             # Draw road arrow
             if road.length > 5 and road.color == 0:
                 for i in np.arange(-0.5*road.length, 0.5*road.length, 10):
@@ -273,6 +274,7 @@ class Window:
                         sin=road.angle_sin
                     )
 
+
     def draw_vehicle(self, vehicle, road):
         l, h = vehicle.l,  2
         sin, cos = road.angle_sin, road.angle_cos
@@ -280,7 +282,7 @@ class Window:
         x = road.start[0] + cos * vehicle.x 
         y = road.start[1] + sin * vehicle.x 
 
-        self.rotated_box((x, y), (l, h), cos=cos, sin=sin, centered=True)
+        self.rotated_box((x, y), (l, h), cos=cos, sin=sin, centered=True, color=vehicle.color)
 
     def draw_vehicles(self):
         for road in self.sim.roads:
