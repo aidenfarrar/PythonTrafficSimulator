@@ -14,24 +14,35 @@ class Vehicle:
         }
 
         self.bike_attributes = {
-            'l': 2,         # length of the car
+            'l': 2,         # length of the bike
             's0': 2,
             'T': 1,
-            'v_max': 8,     # max velocity of the car
-            'a_max': 0.85,  # max acceleration of the car
+            'v_max': 8,     # max velocity of the bike
+            'a_max': 0.85,  # max acceleration of the bike
             'b_max': 4.61,  # max break speed
             'color': (255, 255, 0)
         }
 
         self.walk_attributes = {
-            'l': 1,         # length of the car
+            'l': 1,         # length of the person
             's0': 1,
             'T': 1,
-            'v_max': 4,     # max velocity of the Person
-            'a_max': 0.32,  # max acceleration of the Person
+            'v_max': 4,     # max velocity of the person
+            'a_max': 0.32,  # max acceleration of the person
             'b_max': 4.61,
             'color': (255, 0, 0)
         }
+
+        self.bus_attributes = {
+            'l': 8,         # length of the bus
+            's0': 4,
+            'T': 1,
+            'v_max': 12,     # max velocity of the bus
+            'a_max': 1,  # max acceleration of the bus
+            'b_max': 4.61,
+            'color': (200, 0, 200)
+        }
+
 
         # Set default configuration
         self.set_default_config()
@@ -49,6 +60,10 @@ class Vehicle:
         elif self.vehicle_type == 'walk':
             for attr, val in self.walk_attributes.items():
                 setattr(self, attr, val)
+        elif self.vehicle_type == "bus":
+            for attr, val in self.bus_attributes.items():
+                setattr(self, attr, val)
+
         self.v = self.v_max
         # Calculate properties
         self.init_properties()
