@@ -232,9 +232,9 @@ class Window:
 
     def draw_roads(self):
         color_dict = {
-            0: (255, 180, 180),
-            1: (180, 180, 255),
-            2: (180, 255, 180)
+            0: (255, 180, 180),  # red = one way car road
+            1: (180, 180, 255),  # blue = two way car road
+            2: (180, 255, 180)   # green = two way pedestrian
         }
         label_font = pygame.font.SysFont("monospace", 12)
         for road in self.sim.roads:
@@ -248,14 +248,14 @@ class Window:
                 centered=False
             )
             # Draw road lines
-            # self.rotated_box(
-            #     road.start,
-            #     (road.length, 0.25),
-            #     cos=road.angle_cos,
-            #     sin=road.angle_sin,
-            #     color=(0, 0, 0),
-            #     centered=False
-            # )
+            self.rotated_box(
+                road.start,
+                (road.length, 0.25),
+                cos=road.angle_cos,
+                sin=road.angle_sin,
+                color=(0, 0, 0),
+                centered=False
+            )
 
             label = label_font.render(f'{road.index}', True, (0, 0, 0))
             # self.screen.blit(label, road.start)
@@ -329,4 +329,3 @@ class Window:
 
         # Draw status info
         self.draw_status()
-        

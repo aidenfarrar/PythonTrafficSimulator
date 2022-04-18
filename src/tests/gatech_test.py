@@ -3,11 +3,14 @@ from pickle import dump, load
 from numpy import ones
 from scipy.spatial import distance
 from random import sample, choices
+from trafficSimulator import utils
 
 # Create simulation
 
 
 # Add multiple roads
+
+
 roads = []
 scale_factor = 15
 offset = 40
@@ -16,11 +19,15 @@ reverse_vertex_dict = {}
 vertex_index = 0
 
 INF = 9999
-with open('num_vertices', 'rb') as file:
-    num_vertices = load(file)
-    graph = ones(shape=(num_vertices, num_vertices)) * INF
-    path_matrix = [dict() for x in range(num_vertices)]
+try:
+    with open('num_vertices', 'rb') as file:
+        num_vertices = load(file)
 
+except:
+    num_vertices = 78
+
+graph = ones(shape=(num_vertices, num_vertices)) * INF
+path_matrix = [dict() for x in range(num_vertices)]
 
 with open("gt-model.txt", 'r') as file:
     file.readline()
@@ -59,40 +66,33 @@ with open('num_vertices', 'wb') as file:
 
 sim = Simulation(num_vertices=num_vertices, vertex_dict=vertex_dict)
 
-#floyd washall
-graph_copy = graph.copy()
-for k in range(num_vertices):
-    for i in range(num_vertices):
-        for j in range(num_vertices):
-            detour = graph_copy[i, k] + graph_copy[k, j]
-            if graph_copy[i, j] > detour:
-                graph_copy[i, j] = detour
-                path_matrix[i][j] = path_matrix[i][k] + path_matrix[k][j]
 
+# path_matrix with shortest path destinations
+utils.floyd_warshall(graph, num_vertices, path_matrix)
 
 sim.create_roads(roads)
 
 num_random_paths = 100
 vehicles = []
+
+# num vertices could be hard coded
+start_v_weights = utils.generate_weights(num_vertices)  # likelihood of choosing vertex as start
+end_v_weights = utils.generate_weights(num_vertices)  # likelihood of choosing vertex as end
+
 weights = []
 
-def vehicle_selector(path):
-    if len(path) > 10:
-        return 'car'
-    elif len(path) > 3:
-        return 'bike'
-    else:
-        return 'walk'
-
-
-
 while num_random_paths > 0:
-    start_vertex, end_vertex = sample(range(num_vertices), 2)
-    path = path_matrix[start_vertex][end_vertex]
-    path = sim.path_converter(path)
-    vehicle = vehicle_selector(path)
-    vehicles.append({"path": path, 'vehicle_type': vehicle_selector(path)})
-    weights.append(1)
+    start_vertex, end_vertex = choices(range(num_vertices), weights=start_v_weights)[0], choices(range(num_vertices), weights=end_v_weights)[0]  # chooses start road and end road
+
+    # prevent same start and end vertex
+    while start_vertex == end_vertex:
+        end_vertex = choices(range(num_vertices), weights=end_v_weights)[0]
+
+    print(start_vertex, end_vertex)
+    path = path_matrix[start_vertex][end_vertex]  # gets the shortest path from start road to end road from path_matrix
+    path = sim.path_converter(path)  # converts path coordinates to road
+    vehicles.append({"path": path, 'vehicle_type': utils.vehicle_selector(path)})
+    weights.append(1)  # every car type is equally likely to be generated
     num_random_paths -= 1
 
 sim.create_gen({
