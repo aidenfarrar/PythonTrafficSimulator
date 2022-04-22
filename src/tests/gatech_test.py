@@ -22,7 +22,6 @@ INF = 9999
 try:
     with open('num_vertices', 'rb') as file:
         num_vertices = load(file)
-
 except:
     num_vertices = 78
 
@@ -63,6 +62,7 @@ with open("gt-model.txt", 'r') as file:
 
 with open('num_vertices', 'wb') as file:
     dump(vertex_index, file)
+    print('updated')
 
 sim = Simulation(num_vertices=num_vertices, vertex_dict=vertex_dict)
 
@@ -88,7 +88,6 @@ while num_random_paths > 0:
     while start_vertex == end_vertex:
         end_vertex = choices(range(num_vertices), weights=end_v_weights)[0]
 
-    print(start_vertex, end_vertex)
     path = path_matrix[start_vertex][end_vertex]  # gets the shortest path from start road to end road from path_matrix
     path = sim.path_converter(path)  # converts path coordinates to road
     vehicles.append({"path": path, 'vehicle_type': utils.vehicle_selector(path)})
