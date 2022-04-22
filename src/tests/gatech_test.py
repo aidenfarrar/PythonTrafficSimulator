@@ -19,22 +19,22 @@ with open("gt-model.txt", 'r') as file:
         a1, a2, b1, b2 = [int(x)*scale_factor+offset for x in points]
         roads.append(((a1, a2), (b1, b2)))
         if mode == 1:
-            roads.append(((a1, a2), (b1, b2)))
+            roads.append(((b1, b2), (a1, a2)))
         if mode == 2:
             break
 
 sim.create_roads(roads)
 
-# sim.create_gen({
-#     'vehicle_rate': 60,
-#     'vehicles': [
-#         [1, {"path": [4, 3, 2]}],
-#         [1, {"path": [0]}],
-#         [1, {"path": [1]}],
-#         [1, {"path": [6]}],
-#         [1, {"path": [7]}]
-#     ]
-# })
+sim.create_gen({
+    'vehicle_rate': 60,
+    'vehicles': [
+        [1, {"path": [4, 3, 2]}],
+        [1, {"path": [0]}],
+        [1, {"path": [1]}],
+        [1, {"path": [6]}],
+        [1, {"path": [7]}]
+    ]
+})
 
 # Start simulation
 win = Window(sim)

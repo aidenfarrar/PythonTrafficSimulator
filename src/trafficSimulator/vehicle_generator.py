@@ -16,7 +16,7 @@ class VehicleGenerator:
 
     def set_default_config(self):
         """Set default configuration"""
-        self.poisson = False
+        self.poisson = True
         self.vehicle_rate = 20 # rate for poisson dist
         self.vehicles = [
             (1, {})  # (weight for generation, vehicle config)
