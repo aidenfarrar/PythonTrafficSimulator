@@ -21,8 +21,9 @@ INF = 9999
 try:
     with open('num_vertices', 'rb') as file:
         num_vertices = load(file)
+        print(num_vertices)
 except:
-    num_vertices = 78
+    num_vertices = 95
 
 walk_graph = ones(shape=(num_vertices, num_vertices)) * INF
 car_graph = ones(shape=(num_vertices, num_vertices)) * INF
