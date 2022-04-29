@@ -105,11 +105,8 @@ while num_random_paths > 0:
 
     walk_length = walk_graph[start_vertex, end_vertex] / 2
     car_length = car_graph[start_vertex, end_vertex] / 3 + car_delay
-    try:
-        walk_path = walk_path_matrix[start_vertex][end_vertex]
-    except:
-        print(start_vertex, end_vertex)
-        print()
+
+    walk_path = walk_path_matrix[start_vertex][end_vertex]
     car_path = car_path_matrix[start_vertex][end_vertex]
 
     # gets the shortest path from start road to end road from path_matrix

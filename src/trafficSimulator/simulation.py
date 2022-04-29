@@ -81,6 +81,8 @@ class Simulation:
         self.t += self.dt
         self.frame_count += 1
 
+    def random_path_selection(self):
+
     def path_converter(self, coord_list):
         path = []
         for start, end in coord_list:
