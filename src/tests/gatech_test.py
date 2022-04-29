@@ -2,7 +2,7 @@ from trafficSimulator import *
 from pickle import dump, load
 from numpy import ones
 from scipy.spatial import distance
-from random import sample, choices
+from random import sample
 from trafficSimulator import utils
 
 # Create simulation
@@ -21,7 +21,6 @@ INF = 9999
 try:
     with open('num_vertices', 'rb') as file:
         num_vertices = load(file)
-        print(num_vertices)
 except:
     num_vertices = 95
 
@@ -97,7 +96,7 @@ end_v_weights = utils.generate_weights(num_vertices)  # likelihood of choosing v
 weights = []
 
 while num_random_paths > 0:
-    start_vertex, end_vertex = choices(list(vertices_to_path_to), weights=start_v_weights, k=2)  # chooses start road and end road
+    start_vertex, end_vertex = sample(list(vertices_to_path_to), weights=start_v_weights, k=2)  # chooses start road and end road
     start_vertex = vertex_dict[start_vertex]
     end_vertex = vertex_dict[end_vertex]
 
@@ -106,8 +105,11 @@ while num_random_paths > 0:
 
     walk_length = walk_graph[start_vertex, end_vertex] / 2
     car_length = car_graph[start_vertex, end_vertex] / 3 + car_delay
-
-    walk_path = walk_path_matrix[start_vertex][end_vertex]
+    try:
+        walk_path = walk_path_matrix[start_vertex][end_vertex]
+    except:
+        print(start_vertex, end_vertex)
+        print()
     car_path = car_path_matrix[start_vertex][end_vertex]
 
     # gets the shortest path from start road to end road from path_matrix
