@@ -30,6 +30,51 @@ class Simulation:
         self.road_dicts[self.vertex_dict[start]][self.vertex_dict[end]] = i
         return road
 
+    # def load_roads_from_file(self, filename):
+    #     with open(filename, 'r') as file:
+    #         mode = -1
+    #         for line in file.readlines():
+    #             if line[0] == '#':
+    #                 mode += 1
+    #                 continue
+    #             a, b = line.split(':')
+    #             points = a.split(',') + b.split(',')
+    #             a1, a2, b1, b2 = [int(x) * scale_factor + offset for x in points]
+    #             # a1, a2, b1, b2 = [int(x) for x in points]
+    #             a, b = (a1, a2), (b1, b2)
+    #
+    #             if a not in vertex_dict.keys():
+    #                 vertex_dict[a] = vertex_index
+    #                 reverse_vertex_dict[vertex_index] = a
+    #                 walk_graph[vertex_index, vertex_index] = 0
+    #                 if mode != 2:  # mode 2 = walk / bike
+    #                     vertices_to_path_to.add(a)
+    #                     car_graph[vertex_index, vertex_index] = 0
+    #                 vertex_index += 1
+    #             if b not in vertex_dict.keys():
+    #                 vertex_dict[b] = vertex_index
+    #                 reverse_vertex_dict[vertex_index] = b
+    #                 walk_graph[vertex_index, vertex_index] = 0
+    #                 if mode != 2:  # mode 2 = walk / bike
+    #                     vertices_to_path_to.add(b)
+    #                     car_graph[vertex_index, vertex_index] = 0
+    #                 vertex_index += 1
+    #             ai, bi = vertex_dict[a], vertex_dict[b]
+    #             dist = distance.euclidean(a, b)
+    #             walk_graph[ai, bi] = dist
+    #             if mode != 2:  # mode 2 = walk / bike
+    #                 car_graph[ai, bi] = dist
+    #                 car_path_matrix[ai][bi] = [(ai, bi)]
+    #             walk_path_matrix[ai][bi] = [(ai, bi)]
+    #             roads.append((a, b, mode, mode == 2))
+    #             if mode != 0:
+    #                 roads.append((b, a, mode, mode == 2))
+    #                 walk_graph[bi, ai] = dist
+    #                 walk_path_matrix[bi][ai] = [(bi, ai)]
+    #                 if mode != 2:  # mode 2 = walk / bike
+    #                     car_graph[bi, ai] = dist
+    #                     car_path_matrix[bi][ai] = [(bi, ai)]
+
     def create_roads(self, road_list):
         for i, road in enumerate(road_list):
             self.create_road(*road, i)

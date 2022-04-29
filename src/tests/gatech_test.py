@@ -9,6 +9,8 @@ from trafficSimulator import utils
 
 # Add multiple roads
 
+
+#Parameters
 roads = []
 scale_factor = 15
 offset = 40
@@ -96,7 +98,8 @@ end_v_weights = utils.generate_weights(num_vertices)  # likelihood of choosing v
 weights = []
 
 while num_random_paths > 0:
-    start_vertex, end_vertex = sample(list(vertices_to_path_to), weights=start_v_weights, k=2)  # chooses start road and end road
+    #start_vertex, end_vertex = sample(list(vertices_to_path_to), weights=start_v_weights, k=2)
+    start_vertex, end_vertex = sample(list(vertices_to_path_to), k=2) #chooses start road and end road
     start_vertex = vertex_dict[start_vertex]
     end_vertex = vertex_dict[end_vertex]
 
