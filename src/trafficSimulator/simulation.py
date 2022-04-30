@@ -2,82 +2,142 @@ from .road import Road
 from copy import deepcopy
 from .vehicle_generator import VehicleGenerator
 from .traffic_signal import TrafficSignal
+from numpy import ones
+from .utils import *
+from random import sample
 
 
 class Simulation:
-    def __init__(self, num_vertices, vertex_dict, config={}, ):
-        self.num_vertices = num_vertices
-        self.vertex_dict = vertex_dict
-        # Set default configuration
-        self.set_default_config()
-
-        # Update configuration
-        for attr, val in config.items():
-            setattr(self, attr, val)
-
-    def set_default_config(self):
+    def __init__(self, config={}):
         self.t = 0.0  # Time keeping
         self.frame_count = 0  # Frame count keeping
         self.dt = 1 / 60  # Simulation time step
         self.roads = []  # Array to store roads
         self.generators = []
         self.traffic_signals = []
+
+        # Update configuration with parameters from config
+        for attr, val in config.items():
+            setattr(self, attr, val)
+
+    def set_default_config(self):
         self.road_dicts = [dict() for x in range(self.num_vertices)]
 
     def create_road(self, start, end, color, car_friendly=False, i=-1):
         road = Road(start, end, color, car_friendly, i)
         self.roads.append(road)
-        self.road_dicts[self.vertex_dict[start]][self.vertex_dict[end]] = i
+        # self.road_dicts[self.vertex_dict[start]][self.vertex_dict[end]] = i
         return road
 
-    # def load_roads_from_file(self, filename):
-    #     with open(filename, 'r') as file:
-    #         mode = -1
-    #         for line in file.readlines():
-    #             if line[0] == '#':
-    #                 mode += 1
-    #                 continue
-    #             a, b = line.split(':')
-    #             points = a.split(',') + b.split(',')
-    #             a1, a2, b1, b2 = [int(x) * scale_factor + offset for x in points]
-    #             # a1, a2, b1, b2 = [int(x) for x in points]
-    #             a, b = (a1, a2), (b1, b2)
-    #
-    #             if a not in vertex_dict.keys():
-    #                 vertex_dict[a] = vertex_index
-    #                 reverse_vertex_dict[vertex_index] = a
-    #                 walk_graph[vertex_index, vertex_index] = 0
-    #                 if mode != 2:  # mode 2 = walk / bike
-    #                     vertices_to_path_to.add(a)
-    #                     car_graph[vertex_index, vertex_index] = 0
-    #                 vertex_index += 1
-    #             if b not in vertex_dict.keys():
-    #                 vertex_dict[b] = vertex_index
-    #                 reverse_vertex_dict[vertex_index] = b
-    #                 walk_graph[vertex_index, vertex_index] = 0
-    #                 if mode != 2:  # mode 2 = walk / bike
-    #                     vertices_to_path_to.add(b)
-    #                     car_graph[vertex_index, vertex_index] = 0
-    #                 vertex_index += 1
-    #             ai, bi = vertex_dict[a], vertex_dict[b]
-    #             dist = distance.euclidean(a, b)
-    #             walk_graph[ai, bi] = dist
-    #             if mode != 2:  # mode 2 = walk / bike
-    #                 car_graph[ai, bi] = dist
-    #                 car_path_matrix[ai][bi] = [(ai, bi)]
-    #             walk_path_matrix[ai][bi] = [(ai, bi)]
-    #             roads.append((a, b, mode, mode == 2))
-    #             if mode != 0:
-    #                 roads.append((b, a, mode, mode == 2))
-    #                 walk_graph[bi, ai] = dist
-    #                 walk_path_matrix[bi][ai] = [(bi, ai)]
-    #                 if mode != 2:  # mode 2 = walk / bike
-    #                     car_graph[bi, ai] = dist
-    #                     car_path_matrix[bi][ai] = [(bi, ai)]
+    def load_vertices_from_file(self, filename):
+        with open(filename, 'r') as file:
+            # mode = -1
+            vertex_index = 0
+            for line in file.readlines():
+                if line[0] == '#':
+                    # mode += 1
+                    continue
+                a, b = line.split(':')
+                points = a.split(',') + b.split(',')
+                a1, a2, b1, b2 = [int(x) * self.scale_factor + self.offset for x in points]
+                a, b = (a1, a2), (b1, b2)
 
-    def create_roads(self, road_list):
-        for i, road in enumerate(road_list):
-            self.create_road(*road, i)
+                if a not in self.vertex_dict.keys():
+                    self.vertex_dict[a] = vertex_index
+                    self.reverse_vertex_dict[vertex_index] = a
+                    vertex_index += 1
+                if b not in self.vertex_dict.keys():
+                    self.vertex_dict[b] = vertex_index
+                    self.reverse_vertex_dict[vertex_index] = b
+                    vertex_index += 1
+            self.num_vertices = vertex_index
+            file.close()
+        self.set_default_config()
+        self.create_graphs()
+        self.load_roads_from_file(filename)
+
+    def create_graphs(self):
+        # create walking graph representation and car graph representation
+        self.walk_graph = ones(shape=(self.num_vertices, self.num_vertices)) * self.INF
+        self.car_graph = self.walk_graph.copy()
+        self.sidewalk_matrix = [dict() for x in range(self.num_vertices)]
+        self.road_matrix = [dict() for x in range(self.num_vertices)]
+
+    def load_roads_from_file(self, filename):
+        with open(filename, 'r') as file:
+            mode = -1
+            road_index = 0
+            for line in file.readlines():
+                if line[0] == '#':
+                    mode += 1
+                    continue
+
+                # convert file co-ords to sim co-ords
+                a, b = line.split(':')
+                points = a.split(',') + b.split(',')
+                a1, a2, b1, b2 = [int(x) * self.scale_factor + self.offset for x in points]
+                a, b = (a1, a2), (b1, b2)
+
+                # create road between given vertices
+                # If mode = 0 should be a one-way, mode = 1 means two-way, mode = 2 means sidewalk
+                ai, bi = self.vertex_dict[a], self.vertex_dict[b]
+                sidewalk = self.create_road(a, b, mode, True, road_index)
+                road_index += 1
+                self.walk_graph[ai, bi] = sidewalk.length / self.walk_max_velocity
+                self.sidewalk_matrix[ai][bi] = [sidewalk]
+
+                if mode != 2:  # mode 2 = walk / bike
+                    road = self.create_road(a, b, mode, False, road_index)
+                    road_index += 1
+                    self.car_graph[ai, bi] = road.length / self.car_max_velocity
+                    self.road_matrix[ai][bi] = [road]
+
+                if mode != 0:  # If mode != 0, the road is two way
+                    sidewalk = self.create_road(b, a, mode, True, road_index)
+                    road_index += 1
+                    self.walk_graph[bi, ai] = sidewalk.length
+                    self.sidewalk_matrix[bi][ai] = [sidewalk]
+                    if mode != 2:  # mode 2 = walk / bike\
+                        road = self.create_road(b, a, mode, False, road_index)
+                        road_index += 1
+                        self.car_graph[bi, ai] = road.length
+                        self.road_matrix[bi][ai] = [road]
+            file.close()
+
+    def plan_paths(self):
+        floyd_warshall(self.walk_graph, self.car_graph, self.num_vertices, self.sidewalk_matrix, self.road_matrix)
+
+    def trip_generation(self):
+        vehicles = []
+
+        # num vertices could be hard coded
+        # start_v_weights = generate_weights(len(self.vertices_to_path_to))  # likelihood of choosing vertex as start
+        # end_v_weights = generate_weights(self.num_vertices)  # likelihood of choosing vertex as end
+
+        weights = []
+
+        while self.num_random_trips > 0:
+            # start_vertex, end_vertex = sample(list(vertices_to_path_to), weights=start_v_weights, k=2)
+            start_vertex, end_vertex = sample(range(self.num_vertices), k=2)  # chooses start road and end road
+
+            walk_length = self.walk_graph[start_vertex, end_vertex]
+            # time estimate to get into car so people don't always take car
+            car_length = self.car_graph[start_vertex, end_vertex] + self.car_delay
+
+            # gets the shortest path from start road to end road from path_matrix
+            if walk_length < car_length:
+                walk_path = self.sidewalk_matrix[start_vertex][end_vertex]
+                path = [sidewalk.index for sidewalk in walk_path]
+                vehicles.append({"path": path, 'vehicle_type': vehicle_selector('walk')})
+            else:
+                car_path = self.road_matrix[start_vertex][end_vertex]
+                path = [road.index for road in car_path]
+                vehicles.append({"path": path, 'vehicle_type': vehicle_selector('drive')})
+            # converts path coordinates to road
+            # vehicles.append({"path": path, 'vehicle_type': utils.vehicle_selector(path)})
+            weights.append(1)  # every car type is equally likely to be generated
+            self.num_random_trips -= 1
+        return vehicles, weights
 
     def create_gen(self, config={}):
         gen = VehicleGenerator(self, config)
@@ -126,11 +186,11 @@ class Simulation:
         self.t += self.dt
         self.frame_count += 1
 
-    def path_converter(self, coord_list):
-        path = []
-        for start, end in coord_list:
-            path.append(self.road_dicts[start][end])
-        return path
+    # def path_converter(self, coord_list):
+    #     path = []
+    #     for start, end in coord_list:
+    #         path.append(self.road_dicts[start][end])
+    #     return path
 
     def run(self, steps):
         for _ in range(steps):
