@@ -258,7 +258,7 @@ class Window:
             )
 
             label = label_font.render(f'{road.index}', True, (0, 0, 0))
-            # self.screen.blit(label, road.start)
+            self.screen.blit(label, road.start)
             # Draw road arrow
             if road.length > 5 and road.color == 0:
                 for i in np.arange(-0.5*road.length, 0.5*road.length, 10):

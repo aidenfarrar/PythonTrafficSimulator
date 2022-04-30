@@ -2,9 +2,9 @@ from .road import Road
 from copy import deepcopy
 from .vehicle_generator import VehicleGenerator
 from .traffic_signal import TrafficSignal
-from numpy import ones
+from numpy import ones, argmin
 from .utils import *
-from random import sample
+from random import sample, random
 
 
 class Simulation:
@@ -15,6 +15,9 @@ class Simulation:
         self.roads = []  # Array to store roads
         self.generators = []
         self.traffic_signals = []
+        self.vertex_dict = {}
+        self.reverse_vertex_dict = {}
+        self.vertices_to_path_to = set()
 
         # Update configuration with parameters from config
         for attr, val in config.items():
@@ -83,13 +86,17 @@ class Simulation:
                 ai, bi = self.vertex_dict[a], self.vertex_dict[b]
                 sidewalk = self.create_road(a, b, mode, True, road_index)
                 road_index += 1
-                self.walk_graph[ai, bi] = sidewalk.length / self.walk_max_velocity
+                self.walk_graph[ai, bi] = sidewalk.length #/ self.walk_max_velocity
                 self.sidewalk_matrix[ai][bi] = [sidewalk]
 
                 if mode != 2:  # mode 2 = walk / bike
                     road = self.create_road(a, b, mode, False, road_index)
+                    if a == (0, 0) and b == (4, 0):
+                        print(road.index)
+                    if a == (4, 0) and b == (4, 7):
+                        print(road.index)
                     road_index += 1
-                    self.car_graph[ai, bi] = road.length / self.car_max_velocity
+                    self.car_graph[ai, bi] = road.length #/ self.car_max_velocity
                     self.road_matrix[ai][bi] = [road]
 
                 if mode != 0:  # If mode != 0, the road is two way
@@ -120,21 +127,46 @@ class Simulation:
             # start_vertex, end_vertex = sample(list(vertices_to_path_to), weights=start_v_weights, k=2)
             start_vertex, end_vertex = sample(range(self.num_vertices), k=2)  # chooses start road and end road
 
-            walk_length = self.walk_graph[start_vertex, end_vertex]
-            # time estimate to get into car so people don't always take car
-            car_length = self.car_graph[start_vertex, end_vertex] + self.car_delay
+            transit_times = []
+            transit_options = []
+            transit_speeds = [self.walk_max_velocity, self.bus_max_velocity, ]
 
-            # gets the shortest path from start road to end road from path_matrix
-            if walk_length < car_length:
-                walk_path = self.sidewalk_matrix[start_vertex][end_vertex]
-                path = [sidewalk.index for sidewalk in walk_path]
-                vehicles.append({"path": path, 'vehicle_type': vehicle_selector('walk')})
-            else:
-                car_path = self.road_matrix[start_vertex][end_vertex]
-                path = [road.index for road in car_path]
-                vehicles.append({"path": path, 'vehicle_type': vehicle_selector('drive')})
-            # converts path coordinates to road
-            # vehicles.append({"path": path, 'vehicle_type': utils.vehicle_selector(path)})
+            length = self.walk_graph[start_vertex, end_vertex]
+            walk_length = length / self.walk_max_velocity
+            transit_times.append(length)
+            transit_options.append('walk')
+
+            #time estimate to walk to bus stop, catch bus, and walk from bus stop to destination
+            bus_length = self.car_graph[start_vertex, end_vertex] / self.bus_max_velocity + self.bus_delay
+            transit_times.append(bus_length)
+            transit_options.append('bus')
+
+            own_bike = random() * 100 < self.bike_ownership_percentage
+            own_car = random() * 100 < self.car_ownership_percentage
+            if own_bike:
+                bike_length = length / self.bike_max_velocity
+                transit_times.append(bike_length)
+                transit_options.append('bike')
+                transit_speeds.append(self.bike_max_velocity)
+            if own_car and (walk_length > bus_length):
+                # time estimate to get into car and park car so people don't always take car
+                car_length = self.car_graph[start_vertex, end_vertex] / self.car_max_velocity + self.car_delay
+                transit_times.append(car_length)
+                transit_options.append('car')
+                transit_speeds.append(self.car_max_velocity)
+
+
+            #Finds best transit given options
+            i = argmin(transit_times)
+            best_transit = transit_options[argmin(transit_times)]
+            transit_speed = transit_speeds[i]
+            if best_transit == 'bus' or best_transit == 'car':
+                path = self.road_matrix[start_vertex][end_vertex]
+                path = [road.index for road in path]
+            elif best_transit == 'bike' or best_transit == 'walk':
+                path = self.sidewalk_matrix[start_vertex][end_vertex]
+                path = [sidewalk.index for sidewalk in path]
+            vehicles.append({"path": path, 'vehicle_type': best_transit, 'v_max':transit_speed})
             weights.append(1)  # every car type is equally likely to be generated
             self.num_random_trips -= 1
         return vehicles, weights
@@ -185,12 +217,6 @@ class Simulation:
                 # Increment time
         self.t += self.dt
         self.frame_count += 1
-
-    # def path_converter(self, coord_list):
-    #     path = []
-    #     for start, end in coord_list:
-    #         path.append(self.road_dicts[start][end])
-    #     return path
 
     def run(self, steps):
         for _ in range(steps):

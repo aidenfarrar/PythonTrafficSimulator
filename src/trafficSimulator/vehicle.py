@@ -7,7 +7,7 @@ class Vehicle:
             'l': 4,         # length of the car
             's0': 4,
             'T': 1,
-            'v_max': 16.6,  # max velocity of the car
+            # 'v_max': 16.6,  # max velocity of the car
             'a_max': 1.44,  # max acceleration of the car
             'b_max': 4.61,
             'color': (0, 0, 255)
@@ -17,7 +17,7 @@ class Vehicle:
             'l': 2,         # length of the bike
             's0': 2,
             'T': 1,
-            'v_max': 8,     # max velocity of the bike
+            # 'v_max': 8,     # max velocity of the bike
             'a_max': 0.85,  # max acceleration of the bike
             'b_max': 4.61,  # max break speed
             'color': (255, 255, 0)
@@ -27,7 +27,7 @@ class Vehicle:
             'l': 1,         # length of the person
             's0': 1,
             'T': 1,
-            'v_max': 4,     # max velocity of the person
+            # 'v_max': 4,     # max velocity of the person
             'a_max': 0.32,  # max acceleration of the person
             'b_max': 4.61,
             'color': (255, 0, 0)
@@ -37,7 +37,7 @@ class Vehicle:
             'l': 8,         # length of the bus
             's0': 4,
             'T': 1,
-            'v_max': 12,     # max velocity of the bus
+            # 'v_max': 12,     # max velocity of the bus
             'a_max': 1,  # max acceleration of the bus
             'b_max': 4.61,
             'color': (200, 0, 200)
