@@ -19,6 +19,9 @@ class Simulation:
         self.reverse_vertex_dict = {}
         self.vertices_to_path_to = set()
 
+        self.total_trips = 0
+        self.total_trip_time = 0
+
         # Update configuration with parameters from config
         for attr, val in config.items():
             setattr(self, attr, val)
@@ -220,9 +223,14 @@ class Simulation:
                     # Add it to the next road
                     next_road_index = vehicle.path[vehicle.current_road_index]
                     self.roads[next_road_index].vehicles.append(new_vehicle)
+                else:
+                    self.total_trips += 1
+                    self.total_trip_time += self.t - vehicle.time_added
                 # In all cases, remove it from its road
                 road.vehicles.popleft()
                 # Increment time
+        if self.total_trips != 0:
+            print('Avg Trip Time', self.total_trip_time / self.total_trips, end='\r')
         self.t += self.dt
         self.frame_count += 1
 

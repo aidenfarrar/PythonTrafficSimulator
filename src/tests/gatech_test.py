@@ -18,13 +18,18 @@ sim = Simulation(config=sim_parameters)
 # Set default configuration
 sim.load_vertices_from_file('gt-model.txt')
 sim.plan_paths()
-sim.create_signal([[227, 161], [165, 293]])
 vehicles, weights = sim.trip_generation()
 sim.create_gen({
     'vehicle_rate': 100,
     'vehicles': vehicles,
     'weights': weights
 })
+
+sim.create_signal([[165, 293], [161, 227]])
+sim.create_signal([[281, 287]])
+sim.create_signal([[327], [339]])
+sim.create_signal([[125, 317], [139]]) #0, 29
+sim.create_signal([[133, 189], [173, 179]]) #0, 29
 
 # Start simulation
 win = Window(sim)
