@@ -91,10 +91,12 @@ class Simulation:
 
                 if mode != 2:  # mode 2 = walk / bike
                     road = self.create_road(a, b, mode, False, road_index)
-                    if a == (0, 0) and b == (4, 0):
-                        print(road.index)
-                    if a == (4, 0) and b == (4, 7):
-                        print(road.index)
+                    # # End Vertex
+                    # if b == (25, 29):
+                    #     # Possible Start Vertices
+                    #     if a == (22, 29) or a == (30, 29) or a == (25, 36) or a == (25, 21):
+                    #         print(a, b)
+                    #         print(road.index)
                     road_index += 1
                     self.car_graph[ai, bi] = road.length #/ self.car_max_velocity
                     self.road_matrix[ai][bi] = [road]
@@ -106,6 +108,12 @@ class Simulation:
                     self.sidewalk_matrix[bi][ai] = [sidewalk]
                     if mode != 2:  # mode 2 = walk / bike\
                         road = self.create_road(b, a, mode, False, road_index)
+                        # # End Vertex
+                        # if a == (25, 29):
+                        #     # Possible starting vertices
+                        #     if b == (22, 29) or b == (30, 29) or b == (25, 36) or b == (25, 21):
+                        #         print(b, a)
+                        #         print(road.index)
                         road_index += 1
                         self.car_graph[bi, ai] = road.length
                         self.road_matrix[bi][ai] = [road]

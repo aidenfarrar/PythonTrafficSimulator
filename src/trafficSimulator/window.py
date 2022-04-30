@@ -2,6 +2,7 @@ import pygame
 from pygame import gfxdraw
 import numpy as np
 
+
 class Window:
     def __init__(self, sim, config={}):
         # Simulation to draw
@@ -13,7 +14,7 @@ class Window:
         # Update configurations
         for attr, val in config.items():
             setattr(self, attr, val)
-        
+
     def set_default_config(self):
         """Set default configuration"""
         self.width = 1400
@@ -27,10 +28,9 @@ class Window:
         self.mouse_last = (0, 0)
         self.mouse_down = False
 
-
     def loop(self, loop=None):
         """Shows a window visualizing the simulation and runs the loop function."""
-        
+
         # Create a pygame window
         self.screen = pygame.display.set_mode((self.width, self.height))
         pygame.display.flip()
@@ -67,27 +67,29 @@ class Window:
                         # Left click
                         x, y = pygame.mouse.get_pos()
                         x0, y0 = self.offset
-                        self.mouse_last = (x-x0*self.zoom, y-y0*self.zoom)
+                        self.mouse_last = (x - x0 * self.zoom, y - y0 * self.zoom)
                         self.mouse_down = True
                     if event.button == 4:
                         # Mouse wheel up
-                        self.zoom *=  (self.zoom**2+self.zoom/4+1) / (self.zoom**2+1)
+                        self.zoom *= (self.zoom ** 2 + self.zoom / 4 + 1) / (self.zoom ** 2 + 1)
                     if event.button == 5:
                         # Mouse wheel down 
-                        self.zoom *= (self.zoom**2+1) / (self.zoom**2+self.zoom/4+1)
+                        self.zoom *= (self.zoom ** 2 + 1) / (self.zoom ** 2 + self.zoom / 4 + 1)
                 elif event.type == pygame.MOUSEMOTION:
                     # Drag content
                     if self.mouse_down:
                         x1, y1 = self.mouse_last
                         x2, y2 = pygame.mouse.get_pos()
-                        self.offset = ((x2-x1)/self.zoom, (y2-y1)/self.zoom)
+                        self.offset = ((x2 - x1) / self.zoom, (y2 - y1) / self.zoom)
                 elif event.type == pygame.MOUSEBUTTONUP:
-                    self.mouse_down = False           
+                    self.mouse_down = False
 
     def run(self, steps_per_update=1):
         """Runs the simulation by updating in every loop."""
+
         def loop(sim):
             sim.run(steps_per_update)
+
         self.loop(loop)
 
     def convert(self, x, y=None):
@@ -97,8 +99,8 @@ class Window:
         if isinstance(x, tuple):
             return self.convert(*x)
         return (
-            int(self.width/2 + (x + self.offset[0])*self.zoom),
-            int(self.height/2 + (y + self.offset[1])*self.zoom)
+            int(self.width / 2 + (x + self.offset[0]) * self.zoom),
+            int(self.height / 2 + (y + self.offset[1]) * self.zoom)
         )
 
     def inverse_convert(self, x, y=None):
@@ -108,10 +110,9 @@ class Window:
         if isinstance(x, tuple):
             return self.convert(*x)
         return (
-            int(-self.offset[0] + (x - self.width/2)/self.zoom),
-            int(-self.offset[1] + (y - self.height/2)/self.zoom)
+            int(-self.offset[0] + (x - self.width / 2) / self.zoom),
+            int(-self.offset[1] + (y - self.height / 2) / self.zoom)
         )
-
 
     def background(self, r, g, b):
         """Fills screen with one color."""
@@ -151,19 +152,19 @@ class Window:
 
         if angle:
             cos, sin = np.cos(angle), np.sin(angle)
-        
+
         vertex = lambda e1, e2: (
-            x + (e1*l*cos + e2*h*sin)/2,
-            y + (e1*l*sin - e2*h*cos)/2
+            x + (e1 * l * cos + e2 * h * sin) / 2,
+            y + (e1 * l * sin - e2 * h * cos) / 2
         )
 
         if centered:
             vertices = self.convert(
-                [vertex(*e) for e in [(-1,-1), (-1, 1), (1,1), (1,-1)]]
+                [vertex(*e) for e in [(-1, -1), (-1, 1), (1, 1), (1, -1)]]
             )
         else:
             vertices = self.convert(
-                [vertex(*e) for e in [(0,-1), (0, 1), (2,1), (2,-1)]]
+                [vertex(*e) for e in [(0, -1), (0, 1), (2, 1), (2, -1)]]
             )
 
         self.polygon(vertices, color, filled=filled)
@@ -174,7 +175,7 @@ class Window:
     def arrow(self, pos, size, angle=None, cos=None, sin=None, color=(150, 150, 190)):
         if angle:
             cos, sin = np.cos(angle), np.sin(angle)
-        
+
         self.rotated_box(
             pos,
             size,
@@ -193,7 +194,6 @@ class Window:
             centered=False
         )
 
-
     def draw_axes(self, color=(100, 100, 100)):
         x_start, y_start = self.inverse_convert(0, 0)
         x_end, y_end = self.inverse_convert(self.width, self.height)
@@ -208,25 +208,25 @@ class Window:
             color
         )
 
-    def draw_grid(self, unit=50, color=(150,150,150)):
+    def draw_grid(self, unit=50, color=(150, 150, 150)):
         x_start, y_start = self.inverse_convert(0, 0)
         x_end, y_end = self.inverse_convert(self.width, self.height)
 
         n_x = int(x_start / unit)
         n_y = int(y_start / unit)
-        m_x = int(x_end / unit)+1
-        m_y = int(y_end / unit)+1
+        m_x = int(x_end / unit) + 1
+        m_y = int(y_end / unit) + 1
 
         for i in range(n_x, m_x):
             self.line(
-                self.convert((unit*i, y_start)),
-                self.convert((unit*i, y_end)),
+                self.convert((unit * i, y_start)),
+                self.convert((unit * i, y_end)),
                 color
             )
         for i in range(n_y, m_y):
             self.line(
-                self.convert((x_start, unit*i)),
-                self.convert((x_end, unit*i)),
+                self.convert((x_start, unit * i)),
+                self.convert((x_end, unit * i)),
                 color
             )
 
@@ -234,7 +234,7 @@ class Window:
         color_dict = {
             0: (255, 180, 180),  # red = one way car road
             1: (180, 180, 255),  # blue = two way car road
-            2: (180, 255, 180)   # green = two way pedestrian
+            2: (180, 255, 180)  # green = two way pedestrian
         }
         label_font = pygame.font.SysFont("monospace", 12)
         for road in self.sim.roads:
@@ -258,13 +258,13 @@ class Window:
             )
 
             label = label_font.render(f'{road.index}', True, (0, 0, 0))
-            self.screen.blit(label, road.start)
+            # self.screen.blit(label, road.start)
             # Draw road arrow
             if road.length > 5 and road.color == 0:
-                for i in np.arange(-0.5*road.length, 0.5*road.length, 10):
+                for i in np.arange(-0.5 * road.length, 0.5 * road.length, 10):
                     pos = (
-                        road.start[0] + (road.length/2 + i + 3) * road.angle_cos,
-                        road.start[1] + (road.length/2 + i + 3) * road.angle_sin
+                        road.start[0] + (road.length / 2 + i + 3) * road.angle_cos,
+                        road.start[1] + (road.length / 2 + i + 3) * road.angle_sin
                     )
 
                     self.arrow(
@@ -274,13 +274,12 @@ class Window:
                         sin=road.angle_sin
                     )
 
-
     def draw_vehicle(self, vehicle, road):
-        l, h = vehicle.l,  2
+        l, h = vehicle.l, 2
         sin, cos = road.angle_sin, road.angle_cos
 
-        x = road.start[0] + cos * vehicle.x 
-        y = road.start[1] + sin * vehicle.x 
+        x = road.start[0] + cos * vehicle.x
+        y = road.start[1] + sin * vehicle.x
 
         self.rotated_box((x, y), (l, h), cos=cos, sin=sin, centered=True, color=vehicle.color)
 
@@ -297,8 +296,8 @@ class Window:
                 for road in signal.roads[i]:
                     a = 0
                     position = (
-                        (1-a)*road.end[0] + a*road.start[0],        
-                        (1-a)*road.end[1] + a*road.start[1]
+                        (1 - a) * road.end[0] + a * road.start[0],
+                        (1 - a) * road.end[1] + a * road.start[1]
                     )
                     self.rotated_box(
                         position,
@@ -309,10 +308,9 @@ class Window:
     def draw_status(self):
         text_fps = self.text_font.render(f't={self.sim.t:.5}', False, (0, 0, 0))
         text_frc = self.text_font.render(f'n={self.sim.frame_count}', False, (0, 0, 0))
-        
+
         self.screen.blit(text_fps, (0, 0))
         self.screen.blit(text_frc, (100, 0))
-
 
     def draw(self):
         # Fill background

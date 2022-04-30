@@ -27,8 +27,8 @@ class VehicleGenerator:
         self.burst_queue = deque()  # queue of generated vehicles
         self.burst_freq = 15  # time between bursts
         self.last_burst = 0  # time last burst was completed
-        self.min_burst = 10  # min number of vehicles in burst
-        self.max_burst = 30  # max number of vehicles in burst
+        self.min_burst = 75  # min number of vehicles in burst
+        self.max_burst = 100  # max number of vehicles in burst
 
 
     def init_properties(self):
